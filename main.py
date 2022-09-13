@@ -18,22 +18,23 @@ class Cell:
                         'baixo': True, 'esquerda': True}
         self.visitado = False
         self.volta = False
-        self.espessura = 2
+        self.espessura = 3
 
-    def draw_current_cell(self):
+    def desenhat_bloco_atual(self):
         x, y = self.x * BLOCO, self.y * BLOCO
 
-        pygame.draw.rect(sc, pygame.Color('white'),
+        pygame.draw.rect(sc, pygame.Color('lightblue'),
                          (x+self.espessura, y+self.espessura, BLOCO-self.espessura, BLOCO-self.espessura))
 
-    def draw(self):
+    def desenhar(self):
         x, y = self.x * BLOCO, self.y * BLOCO
 
         if self.visitado and not self.volta:
-            pygame.draw.rect(sc, pygame.Color('white'), (x, y, BLOCO, BLOCO))
-        elif self.volta:
             pygame.draw.rect(sc, pygame.Color(
                 'lightblue'), (x, y, BLOCO, BLOCO))
+        elif self.volta:
+            pygame.draw.rect(sc, pygame.Color(
+                'white'), (x, y, BLOCO, BLOCO))
 
         if self.paredes['cima']:
             pygame.draw.line(sc, pygame.Color('black'),
@@ -98,9 +99,9 @@ while True:
         if event.type == pygame.QUIT:
             exit()
 
-    [cell.draw() for cell in grid_cells]
+    [cell.desenhar() for cell in grid_cells]
     current_cell.visitado = True
-    # current_cell.draw_current_cell()
+    # current_cell.desenhat_bloco_atual()
 
     next_cell = current_cell.vizinhos()
     if next_cell:

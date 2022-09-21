@@ -1,8 +1,9 @@
 import pygame
 from random import choice
+from random import shuffle
 
 RES = LARGURA, ALTURA = 1200, 900
-BLOCO = 50
+BLOCO = 100
 cols, rows = LARGURA // BLOCO, ALTURA // BLOCO
 
 pygame.init()
@@ -20,7 +21,7 @@ class Cell:
         self.volta = False
         self.espessura = 3
 
-    def desenhat_bloco_atual(self):
+    def desenhar_bloco_atual(self):
         x, y = self.x * BLOCO, self.y * BLOCO
 
         pygame.draw.rect(sc, pygame.Color('lightblue'),
@@ -69,7 +70,9 @@ class Cell:
             vizinhos.append(baixo)
         if esquerda and not esquerda.visitado:
             vizinhos.append(esquerda)
-        return choice(vizinhos) if vizinhos else False
+
+        shuffle(vizinhos)
+        return vizinhos
 
 
 def remover_paredes(current, next):
@@ -89,32 +92,46 @@ def remover_paredes(current, next):
         next.paredes['cima'] = False
 
 
+def desenhar_caminho():
+    [cell.desenhar() for cell in grid_cells]
+    pygame.display.flip()
+
+
+def busca(v_atual):
+
+    desenhar_caminho()
+    v_atual.visitado = True
+
+    for v_proximo in v_atual.vizinhos():
+        if not v_proximo.visitado:
+            remover_paredes(v_atual, v_proximo)
+            time.tick(10)
+            busca(v_proximo)
+    v_atual.volta = True
+    desenhar_caminho()
+    time.tick(10)
+
+
 grid_cells = [Cell(col, row) for row in range(rows) for col in range(cols)]
-current_cell = grid_cells[0]
-stack = []
+v_atual = grid_cells[0]
 sc.fill(pygame.Color('black'))
+
+v_atual.visitado = True
+vizinhos = v_atual.vizinhos()
 
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit()
 
-    [cell.desenhar() for cell in grid_cells]
-    current_cell.visitado = True
-    # current_cell.desenhat_bloco_atual()
+    if not v_atual.volta:
+        [cell.desenhar() for cell in grid_cells]
+        for v_proximo in vizinhos:
+            if not v_proximo.visitado:
+                remover_paredes(v_atual, v_proximo)
+                time.tick(10)
+                busca(v_proximo)
 
-    next_cell = current_cell.vizinhos()
-    if next_cell:
-        next_cell.visitado = True
-        stack.append(current_cell)
-        remover_paredes(current_cell, next_cell)
-        current_cell = next_cell
-    elif stack:
-        current_cell.volta = True
-        current_cell = stack.pop()
-        if not current_cell.vizinhos():
-            current_cell.volta = True
-
-    pygame.display.flip()
-
-    time.tick(10)
+        v_atual.volta = True
+        [cell.desenhar() for cell in grid_cells]
+        pygame.display.flip()
